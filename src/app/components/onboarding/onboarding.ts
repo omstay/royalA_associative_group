@@ -1,5 +1,5 @@
 // src/app/components/onboarding/onboarding.component.ts
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -10,233 +10,10 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-onboarding',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  template: `
-    <div class="onboarding-container">
-      <div class="onboarding-card">
-        <div class="card-header">
-          <h2>Employee Onboarding</h2>
-          <p>Royal Associates Group</p>
-        </div>
-
-        <form [formGroup]="onboardingForm" (ngSubmit)="onSubmit()" class="onboarding-form">
-          
-          <!-- Basic Information -->
-          <div class="section">
-            <h3>Basic Information</h3>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="name">Full Name *</label>
-                <input 
-                  type="text" 
-                  id="name" 
-                  formControlName="name"
-                  class="form-control"
-                  placeholder="Enter full name"
-                  [class.error]="onboardingForm.get('name')?.invalid && onboardingForm.get('name')?.touched"
-                >
-                <div *ngIf="onboardingForm.get('name')?.invalid && onboardingForm.get('name')?.touched" class="error-message">
-                  <small>Name is required</small>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="slNo">Serial Number *</label>
-                <input 
-                  type="text" 
-                  id="slNo" 
-                  formControlName="slNo"
-                  class="form-control"
-                  placeholder="Enter serial number"
-                  [class.error]="onboardingForm.get('slNo')?.invalid && onboardingForm.get('slNo')?.touched"
-                >
-                <div *ngIf="onboardingForm.get('slNo')?.invalid && onboardingForm.get('slNo')?.touched" class="error-message">
-                  <small>Serial number is required</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="address">Address *</label>
-              <textarea 
-                id="address" 
-                formControlName="address"
-                class="form-control textarea"
-                rows="3"
-                placeholder="Enter full address"
-                [class.error]="onboardingForm.get('address')?.invalid && onboardingForm.get('address')?.touched"
-              ></textarea>
-              <div *ngIf="onboardingForm.get('address')?.invalid && onboardingForm.get('address')?.touched" class="error-message">
-                <small>Address is required</small>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="mobileNumber">Mobile Number *</label>
-                <input 
-                  type="tel" 
-                  id="mobileNumber" 
-                  formControlName="mobileNumber"
-                  class="form-control"
-                  placeholder="Enter mobile number"
-                  [class.error]="onboardingForm.get('mobileNumber')?.invalid && onboardingForm.get('mobileNumber')?.touched"
-                >
-                <div *ngIf="onboardingForm.get('mobileNumber')?.invalid && onboardingForm.get('mobileNumber')?.touched" class="error-message">
-                  <small *ngIf="onboardingForm.get('mobileNumber')?.errors?.['required']">Mobile number is required</small>
-                  <small *ngIf="onboardingForm.get('mobileNumber')?.errors?.['pattern']">Please enter a valid mobile number</small>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="emailId">Email ID *</label>
-                <input 
-                  type="email" 
-                  id="emailId" 
-                  formControlName="emailId"
-                  class="form-control"
-                  placeholder="Enter email address"
-                  [class.error]="onboardingForm.get('emailId')?.invalid && onboardingForm.get('emailId')?.touched"
-                >
-                <div *ngIf="onboardingForm.get('emailId')?.invalid && onboardingForm.get('emailId')?.touched" class="error-message">
-                  <small *ngIf="onboardingForm.get('emailId')?.errors?.['required']">Email is required</small>
-                  <small *ngIf="onboardingForm.get('emailId')?.errors?.['email']">Please enter a valid email</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Biometric Information -->
-          <div class="section">
-            <h3>Biometric Information</h3>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>Signature</label>
-                <div class="signature-container">
-                  <canvas 
-                    #signatureCanvas
-                    class="signature-canvas"
-                    (mousedown)="startDrawing($event)"
-                    (mousemove)="draw($event)"
-                    (mouseup)="stopDrawing()"
-                    (mouseleave)="stopDrawing()"
-                    width="300"
-                    height="150"
-                  ></canvas>
-                  <div class="signature-controls">
-                    <button type="button" class="btn btn-secondary" (click)="clearSignature()">Clear</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Fingerprint</label>
-                <div class="fingerprint-container">
-                  <button 
-                    type="button" 
-                    class="btn btn-outline fingerprint-btn"
-                    (click)="captureFingerprint()"
-                    [disabled]="fingerprintLoading"
-                  >
-                    <div class="fingerprint-icon">👆</div>
-                    <span *ngIf="!fingerprintLoading">Scan Fingerprint</span>
-                    <span *ngIf="fingerprintLoading">Scanning...</span>
-                  </button>
-                  <div *ngIf="fingerprintCaptured" class="fingerprint-success">
-                    ✓ Fingerprint captured successfully
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Photo Capture -->
-          <div class="section">
-            <h3>Photo Capture</h3>
-            
-            <div class="photo-capture-container">
-              <div class="camera-container" *ngIf="!photoCaptured">
-                <video 
-                  #videoElement
-                  class="camera-preview"
-                  [style.display]="cameraActive ? 'block' : 'none'"
-                  autoplay
-                  playsinline
-                ></video>
-                <canvas #photoCanvas style="display: none;"></canvas>
-                
-                <div class="camera-controls">
-                  <button 
-                    type="button" 
-                    class="btn btn-primary"
-                    (click)="startCamera()"
-                    *ngIf="!cameraActive"
-                  >
-                    Start Camera
-                  </button>
-                  <button 
-                    type="button" 
-                    class="btn btn-success"
-                    (click)="capturePhoto()"
-                    *ngIf="cameraActive"
-                  >
-                    📸 Capture Photo
-                  </button>
-                  <button 
-                    type="button" 
-                    class="btn btn-secondary"
-                    (click)="stopCamera()"
-                    *ngIf="cameraActive"
-                  >
-                    Stop Camera
-                  </button>
-                </div>
-              </div>
-              
-              <div class="photo-preview" *ngIf="photoCaptured">
-                <img [src]="capturedPhotoUrl" alt="Captured photo" class="captured-photo">
-                <div class="photo-controls">
-                  <button type="button" class="btn btn-secondary" (click)="retakePhoto()">
-                    Retake Photo
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="errorMessage" class="alert alert-error">
-            {{ errorMessage }}
-          </div>
-
-          <div *ngIf="successMessage" class="alert alert-success">
-            {{ successMessage }}
-          </div>
-
-          <div class="form-actions">
-            <button 
-              type="button" 
-              class="btn btn-secondary"
-              routerLink="/dashboard"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-              [disabled]="onboardingForm.invalid || loading"
-            >
-              <span *ngIf="loading" class="spinner"></span>
-              {{ loading ? 'Saving...' : 'Save Employee Data' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `,
-  styleUrls: ['./onboarding.component.css']
+  templateUrl: './onboarding.html',
+  styleUrls: ['./onboarding.css']
 })
-export class OnboardingComponent {
+export class OnboardingComponent implements OnInit, OnDestroy {
   @ViewChild('signatureCanvas') signatureCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('photoCanvas') photoCanvas!: ElementRef<HTMLCanvasElement>;
@@ -246,15 +23,16 @@ export class OnboardingComponent {
   errorMessage = '';
   successMessage = '';
 
-  // Signature
+  // Signature properties
   isDrawing = false;
   signatureContext: CanvasRenderingContext2D | null = null;
+  hasSignature = false;
 
-  // Fingerprint
+  // Fingerprint properties
   fingerprintLoading = false;
   fingerprintCaptured = false;
 
-  // Photo
+  // Photo properties
   cameraActive = false;
   photoCaptured = false;
   capturedPhotoUrl = '';
@@ -266,75 +44,115 @@ export class OnboardingComponent {
     private authService: AuthService
   ) {
     this.onboardingForm = this.fb.group({
-      name: ['', [Validators.required]],
-      slNo: ['', [Validators.required]],
-      address: ['', [Validators.required]],
-      mobileNumber: ['', [Validators.required, Validators.pattern(/^\+?[\d\s\-\(\)]+$/)]],
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      slNo: ['', [Validators.required, Validators.minLength(3)]],
+      address: ['', [Validators.required, Validators.minLength(10)]],
+      mobileNumber: ['', [
+        Validators.required, 
+        Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)
+      ]],
       emailId: ['', [Validators.required, Validators.email]]
     });
   }
 
+  ngOnInit() {
+    // Initialize component
+  }
+
   ngAfterViewInit() {
-    if (this.signatureCanvas) {
-      this.signatureContext = this.signatureCanvas.nativeElement.getContext('2d');
-      if (this.signatureContext) {
-        this.signatureContext.strokeStyle = '#000';
-        this.signatureContext.lineWidth = 2;
-        this.signatureContext.lineCap = 'round';
-      }
-    }
+    this.initializeSignatureCanvas();
   }
 
   ngOnDestroy() {
     this.stopCamera();
   }
 
+  // Initialize signature canvas
+  private initializeSignatureCanvas() {
+    if (this.signatureCanvas) {
+      const canvas = this.signatureCanvas.nativeElement;
+      this.signatureContext = canvas.getContext('2d');
+      
+      if (this.signatureContext) {
+        this.signatureContext.strokeStyle = '#2563eb';
+        this.signatureContext.lineWidth = 3;
+        this.signatureContext.lineCap = 'round';
+        this.signatureContext.lineJoin = 'round';
+        
+        // Set canvas background
+        this.signatureContext.fillStyle = '#ffffff';
+        this.signatureContext.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  }
+
   // Signature Methods
   startDrawing(event: MouseEvent) {
     if (!this.signatureContext) return;
+    
+    event.preventDefault();
     this.isDrawing = true;
+    this.hasSignature = true;
+    
     const rect = this.signatureCanvas.nativeElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
     this.signatureContext.beginPath();
-    this.signatureContext.moveTo(
-      event.clientX - rect.left,
-      event.clientY - rect.top
-    );
+    this.signatureContext.moveTo(x, y);
   }
 
   draw(event: MouseEvent) {
     if (!this.isDrawing || !this.signatureContext) return;
+    
+    event.preventDefault();
     const rect = this.signatureCanvas.nativeElement.getBoundingClientRect();
-    this.signatureContext.lineTo(
-      event.clientX - rect.left,
-      event.clientY - rect.top
-    );
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    this.signatureContext.lineTo(x, y);
     this.signatureContext.stroke();
   }
 
   stopDrawing() {
+    if (!this.signatureContext) return;
     this.isDrawing = false;
+    this.signatureContext.closePath();
   }
 
   clearSignature() {
     if (!this.signatureContext) return;
-    this.signatureContext.clearRect(
-      0, 0,
-      this.signatureCanvas.nativeElement.width,
-      this.signatureCanvas.nativeElement.height
-    );
+    
+    const canvas = this.signatureCanvas.nativeElement;
+    this.signatureContext.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Reset canvas background
+    this.signatureContext.fillStyle = '#ffffff';
+    this.signatureContext.fillRect(0, 0, canvas.width, canvas.height);
+    
+    this.hasSignature = false;
   }
 
   // Fingerprint Methods
   async captureFingerprint() {
     this.fingerprintLoading = true;
+    this.errorMessage = '';
+    
     try {
-      // Simulate fingerprint capture (replace with actual fingerprint API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      this.fingerprintCaptured = true;
-      this.successMessage = 'Fingerprint captured successfully';
-      setTimeout(() => this.successMessage = '', 3000);
-    } catch (error) {
-      this.errorMessage = 'Failed to capture fingerprint. Please try again.';
+      // Simulate fingerprint capture API call
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Simulate success/failure (80% success rate)
+      if (Math.random() > 0.2) {
+        this.fingerprintCaptured = true;
+        this.successMessage = 'Fingerprint captured successfully!';
+        setTimeout(() => this.successMessage = '', 3000);
+      } else {
+        throw new Error('Fingerprint capture failed. Please try again.');
+      }
+    } catch (error: any) {
+      this.errorMessage = error.message || 'Failed to capture fingerprint. Please try again.';
+      setTimeout(() => this.errorMessage = '', 5000);
     } finally {
       this.fingerprintLoading = false;
     }
@@ -343,31 +161,55 @@ export class OnboardingComponent {
   // Camera Methods
   async startCamera() {
     try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
+      this.errorMessage = '';
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
       });
-      this.videoElement.nativeElement.srcObject = this.mediaStream;
-      this.cameraActive = true;
-    } catch (error) {
-      this.errorMessage = 'Failed to access camera. Please check permissions.';
+      
+      if (this.videoElement) {
+        this.videoElement.nativeElement.srcObject = this.mediaStream;
+        this.cameraActive = true;
+      }
+    } catch (error: any) {
+      console.error('Camera access error:', error);
+      this.errorMessage = 'Failed to access camera. Please check permissions and try again.';
     }
   }
 
   capturePhoto() {
-    if (!this.cameraActive || !this.mediaStream) return;
+    if (!this.cameraActive || !this.mediaStream || !this.videoElement || !this.photoCanvas) {
+      return;
+    }
 
-    const canvas = this.photoCanvas.nativeElement;
-    const video = this.videoElement.nativeElement;
-    const context = canvas.getContext('2d');
+    try {
+      const canvas = this.photoCanvas.nativeElement;
+      const video = this.videoElement.nativeElement;
+      const context = canvas.getContext('2d');
 
-    if (context) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0);
-      
-      this.capturedPhotoUrl = canvas.toDataURL('image/jpeg', 0.8);
-      this.photoCaptured = true;
-      this.stopCamera();
+      if (context && video.videoWidth > 0 && video.videoHeight > 0) {
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw the current video frame to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert to data URL
+        this.capturedPhotoUrl = canvas.toDataURL('image/jpeg', 0.8);
+        this.photoCaptured = true;
+        
+        // Stop camera after capturing
+        this.stopCamera();
+        
+        this.successMessage = 'Photo captured successfully!';
+        setTimeout(() => this.successMessage = '', 3000);
+      }
+    } catch (error) {
+      this.errorMessage = 'Failed to capture photo. Please try again.';
     }
   }
 
@@ -384,42 +226,146 @@ export class OnboardingComponent {
     this.capturedPhotoUrl = '';
   }
 
+  // Form submission
   async onSubmit() {
     if (this.onboardingForm.valid) {
       this.loading = true;
       this.errorMessage = '';
+      this.successMessage = '';
 
       try {
+        // Validate required biometric data
+        if (!this.hasSignature) {
+          throw new Error('Please provide your signature.');
+        }
+
+        if (!this.fingerprintCaptured) {
+          throw new Error('Please capture your fingerprint.');
+        }
+
+        if (!this.photoCaptured) {
+          throw new Error('Please capture your photo.');
+        }
+
         const currentUser = this.authService.getCurrentUser();
-        if (!currentUser) throw new Error('User not authenticated');
+        if (!currentUser) {
+          throw new Error('User not authenticated. Please log in again.');
+        }
+
+        // Upload files to Firebase Storage
+        let signatureUrl = '';
+        let photoUrl = '';
+
+        try {
+          // Upload signature
+          if (this.hasSignature) {
+            signatureUrl = await this.onboardingService.uploadBase64File(
+              this.signatureCanvas.nativeElement.toDataURL('image/png'),
+              'signature.png',
+              currentUser.uid
+            );
+          }
+
+          // Upload photo
+          if (this.capturedPhotoUrl) {
+            photoUrl = await this.onboardingService.uploadBase64File(
+              this.capturedPhotoUrl,
+              'photo.jpg',
+              currentUser.uid
+            );
+          }
+        } catch (uploadError) {
+          console.error('File upload error:', uploadError);
+          throw new Error('Failed to upload files. Please try again.');
+        }
 
         const onboardingData: OnboardingData = {
           ...this.onboardingForm.value,
-          signature: this.signatureCanvas.nativeElement.toDataURL(),
+          signature: signatureUrl,
           fingerprint: this.fingerprintCaptured ? 'captured' : '',
-          photo: this.capturedPhotoUrl,
+          photo: photoUrl,
           createdAt: new Date(),
-          createdBy: currentUser.uid
+          createdBy: currentUser.uid,
+          userId: currentUser.uid
         };
 
         await this.onboardingService.saveOnboardingData(onboardingData);
+        
         this.successMessage = 'Employee data saved successfully!';
         
         // Reset form after successful submission
         setTimeout(() => {
-          this.onboardingForm.reset();
-          this.clearSignature();
-          this.fingerprintCaptured = false;
-          this.photoCaptured = false;
-          this.capturedPhotoUrl = '';
-          this.successMessage = '';
+          this.resetForm();
+          // Redirect to dashboard or next page
+          window.location.href = '/dashboard';
         }, 2000);
 
       } catch (error: any) {
+        console.error('Onboarding submission error:', error);
         this.errorMessage = error.message || 'Failed to save employee data. Please try again.';
       } finally {
         this.loading = false;
       }
+    } else {
+      this.markAllFieldsAsTouched();
+      this.errorMessage = 'Please fill all required fields correctly.';
     }
+  }
+
+  // Helper methods
+  private markAllFieldsAsTouched() {
+    Object.keys(this.onboardingForm.controls).forEach(key => {
+      this.onboardingForm.get(key)?.markAsTouched();
+    });
+  }
+
+  private resetForm() {
+    this.onboardingForm.reset();
+    this.clearSignature();
+    this.fingerprintCaptured = false;
+    this.photoCaptured = false;
+    this.capturedPhotoUrl = '';
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
+  // Getter methods for template
+  get isFormValid(): boolean {
+    return this.onboardingForm.valid && this.hasSignature && this.fingerprintCaptured && this.photoCaptured;
+  }
+
+  // Progress calculation
+  getProgressPercentage(): number {
+    let completedFields = 0;
+    let totalFields = 7; // 5 form fields + signature + fingerprint + photo
+
+    // Check form fields
+    const formFields = ['name', 'slNo', 'address', 'mobileNumber', 'emailId'];
+    formFields.forEach(field => {
+      const control = this.onboardingForm.get(field);
+      if (control && control.valid) {
+        completedFields++;
+      }
+    });
+
+    // Check biometric data
+    if (this.hasSignature) completedFields++;
+    if (this.fingerprintCaptured) completedFields++;
+    if (this.photoCaptured) completedFields++;
+
+    return Math.round((completedFields / totalFields) * 100);
+  }
+
+  // Section completion checks
+  isBasicInfoCompleted(): boolean {
+    const basicFields = ['name', 'slNo', 'address', 'mobileNumber', 'emailId'];
+    return basicFields.every(field => {
+      const control = this.onboardingForm.get(field);
+      return control && control.valid;
+    });
+  }
+
+  isBiometricCompleted(): boolean {
+    return this.hasSignature && this.fingerprintCaptured;
   }
 }

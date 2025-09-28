@@ -28,6 +28,12 @@ export class AdminLoginComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    // Check if user is already logged in
+    if (this.authService.isLoggedIn()) {
+      console.log('User already logged in, redirecting...');
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   togglePassword(): void {
@@ -49,8 +55,19 @@ export class AdminLoginComponent implements OnInit {
 
       try {
         await this.authService.loginAdmin(email, password);
-        console.log('Login successful, navigating to onboarding');
-        this.router.navigate(['/onboarding']); // Navigate to onboarding page
+        console.log('Login successful');
+        
+        // Wait a moment for auth state to update
+        setTimeout(() => {
+          if (this.authService.isLoggedIn()) {
+            console.log('Auth state confirmed, navigating to dashboard');
+            this.router.navigate(['/dashboard']);
+          } else {
+            console.log('Auth state not updated, trying onboarding');
+            this.router.navigate(['/onboarding']);
+          }
+        }, 1000);
+        
       } catch (error: any) {
         console.error('Login error:', error);
         this.errorMessage = this.getErrorMessage(error);
@@ -77,6 +94,8 @@ export class AdminLoginComponent implements OnInit {
           return 'Too many failed attempts. Please try again later.';
         case 'auth/network-request-failed':
           return 'Network error. Please check your internet connection.';
+        case 'auth/invalid-credential':
+          return 'Invalid email or password. Please check your credentials.';
         default:
           return error.message || 'Login failed. Please try again.';
       }

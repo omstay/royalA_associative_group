@@ -20,6 +20,9 @@ export interface OnboardingData {
   providedIn: 'root'
 })
 export class OnboardingService {
+  uploadBase64File(arg0: string, arg1: string, uid: string): string | PromiseLike<string> {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     private firestore: Firestore,
     private storage: Storage
