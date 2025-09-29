@@ -1,8 +1,8 @@
 // src/app/components/onboarding/onboarding.component.ts
-import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { OnboardingService, OnboardingData } from '../../services/onboarding.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './onboarding.html',
   styleUrls: ['./onboarding.css']
 })
-export class OnboardingComponent implements OnInit, OnDestroy {
+export class OnboardingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('signatureCanvas') signatureCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('photoCanvas') photoCanvas!: ElementRef<HTMLCanvasElement>;
@@ -31,6 +31,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   // Fingerprint properties
   fingerprintLoading = false;
   fingerprintCaptured = false;
+  fingerprintData = '';
 
   // Photo properties
   cameraActive = false;
@@ -41,34 +42,36 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private onboardingService: OnboardingService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
+    // Only basic information is required, biometrics are optional
     this.onboardingForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      slNo: ['', [Validators.required, Validators.minLength(3)]],
-      address: ['', [Validators.required, Validators.minLength(10)]],
-      mobileNumber: ['', [
-        Validators.required, 
-        Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)
-      ]],
+      name: ['', Validators.required],
+      slNo: ['', Validators.required],
+      address: ['', Validators.required],
+      mobileNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       emailId: ['', [Validators.required, Validators.email]]
     });
   }
 
-  ngOnInit() {
-    // Initialize component
+  ngOnInit(): void {
+    console.log('Onboarding component initialized');
   }
 
-  ngAfterViewInit() {
-    this.initializeSignatureCanvas();
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeSignatureCanvas();
+    }, 100);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.stopCamera();
   }
 
-  // Initialize signature canvas
-  private initializeSignatureCanvas() {
+  // ==================== SIGNATURE METHODS ====================
+  
+  private initializeSignatureCanvas(): void {
     if (this.signatureCanvas) {
       const canvas = this.signatureCanvas.nativeElement;
       this.signatureContext = canvas.getContext('2d');
@@ -79,15 +82,13 @@ export class OnboardingComponent implements OnInit, OnDestroy {
         this.signatureContext.lineCap = 'round';
         this.signatureContext.lineJoin = 'round';
         
-        // Set canvas background
         this.signatureContext.fillStyle = '#ffffff';
         this.signatureContext.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
   }
 
-  // Signature Methods
-  startDrawing(event: MouseEvent) {
+  startDrawing(event: MouseEvent): void {
     if (!this.signatureContext) return;
     
     event.preventDefault();
@@ -102,7 +103,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.signatureContext.moveTo(x, y);
   }
 
-  draw(event: MouseEvent) {
+  draw(event: MouseEvent): void {
     if (!this.isDrawing || !this.signatureContext) return;
     
     event.preventDefault();
@@ -114,36 +115,37 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.signatureContext.stroke();
   }
 
-  stopDrawing() {
+  stopDrawing(): void {
     if (!this.signatureContext) return;
     this.isDrawing = false;
     this.signatureContext.closePath();
   }
 
-  clearSignature() {
+  clearSignature(): void {
     if (!this.signatureContext) return;
     
     const canvas = this.signatureCanvas.nativeElement;
     this.signatureContext.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Reset canvas background
     this.signatureContext.fillStyle = '#ffffff';
     this.signatureContext.fillRect(0, 0, canvas.width, canvas.height);
     
     this.hasSignature = false;
   }
 
-  // Fingerprint Methods
-  async captureFingerprint() {
+  // ==================== FINGERPRINT METHODS ====================
+  
+  async captureFingerprint(): Promise<void> {
     this.fingerprintLoading = true;
     this.errorMessage = '';
     
     try {
-      // Simulate fingerprint capture API call
+      // Simulate fingerprint capture with actual data
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Simulate success/failure (80% success rate)
       if (Math.random() > 0.2) {
+        // Generate a unique fingerprint identifier
+        this.fingerprintData = `FP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         this.fingerprintCaptured = true;
         this.successMessage = 'Fingerprint captured successfully!';
         setTimeout(() => this.successMessage = '', 3000);
@@ -158,8 +160,9 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Camera Methods
-  async startCamera() {
+  // ==================== CAMERA METHODS ====================
+  
+  async startCamera(): Promise<void> {
     try {
       this.errorMessage = '';
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -180,7 +183,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     }
   }
 
-  capturePhoto() {
+  capturePhoto(): void {
     if (!this.cameraActive || !this.mediaStream || !this.videoElement || !this.photoCanvas) {
       return;
     }
@@ -191,29 +194,27 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       const context = canvas.getContext('2d');
 
       if (context && video.videoWidth > 0 && video.videoHeight > 0) {
-        // Set canvas dimensions to match video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         
-        // Draw the current video frame to canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Convert to data URL
+        // Store the photo as base64
         this.capturedPhotoUrl = canvas.toDataURL('image/jpeg', 0.8);
         this.photoCaptured = true;
         
-        // Stop camera after capturing
         this.stopCamera();
         
         this.successMessage = 'Photo captured successfully!';
         setTimeout(() => this.successMessage = '', 3000);
       }
     } catch (error) {
+      console.error('Photo capture error:', error);
       this.errorMessage = 'Failed to capture photo. Please try again.';
     }
   }
 
-  stopCamera() {
+  stopCamera(): void {
     if (this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => track.stop());
       this.mediaStream = null;
@@ -221,125 +222,126 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.cameraActive = false;
   }
 
-  retakePhoto() {
+  retakePhoto(): void {
     this.photoCaptured = false;
     this.capturedPhotoUrl = '';
   }
 
-  // Form submission
-  async onSubmit() {
-    if (this.onboardingForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
-      this.successMessage = '';
+  // ==================== FORM SUBMISSION ====================
+  
+  async onSubmit(): Promise<void> {
+  // Only check if basic form fields are valid
+  if (this.onboardingForm.valid) {
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-      try {
-        // Validate required biometric data
-        if (!this.hasSignature) {
-          throw new Error('Please provide your signature.');
-        }
-
-        if (!this.fingerprintCaptured) {
-          throw new Error('Please capture your fingerprint.');
-        }
-
-        if (!this.photoCaptured) {
-          throw new Error('Please capture your photo.');
-        }
-
-        const currentUser = this.authService.getCurrentUser();
-        if (!currentUser) {
-          throw new Error('User not authenticated. Please log in again.');
-        }
-
-        // Upload files to Firebase Storage
-        let signatureUrl = '';
-        let photoUrl = '';
-
-        try {
-          // Upload signature
-          if (this.hasSignature) {
-            signatureUrl = await this.onboardingService.uploadBase64File(
-              this.signatureCanvas.nativeElement.toDataURL('image/png'),
-              'signature.png',
-              currentUser.uid
-            );
-          }
-
-          // Upload photo
-          if (this.capturedPhotoUrl) {
-            photoUrl = await this.onboardingService.uploadBase64File(
-              this.capturedPhotoUrl,
-              'photo.jpg',
-              currentUser.uid
-            );
-          }
-        } catch (uploadError) {
-          console.error('File upload error:', uploadError);
-          throw new Error('Failed to upload files. Please try again.');
-        }
-
-        const onboardingData: OnboardingData = {
-          ...this.onboardingForm.value,
-          signature: signatureUrl,
-          fingerprint: this.fingerprintCaptured ? 'captured' : '',
-          photo: photoUrl,
-          createdAt: new Date(),
-          createdBy: currentUser.uid,
-          userId: currentUser.uid
-        };
-
-        await this.onboardingService.saveOnboardingData(onboardingData);
-        
-        this.successMessage = 'Employee data saved successfully!';
-        
-        // Reset form after successful submission
-        setTimeout(() => {
-          this.resetForm();
-          // Redirect to dashboard or next page
-          window.location.href = '/dashboard';
-        }, 2000);
-
-      } catch (error: any) {
-        console.error('Onboarding submission error:', error);
-        this.errorMessage = error.message || 'Failed to save employee data. Please try again.';
-      } finally {
-        this.loading = false;
+    try {
+      const currentUser = this.authService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated. Please log in again.');
       }
-    } else {
-      this.markAllFieldsAsTouched();
-      this.errorMessage = 'Please fill all required fields correctly.';
-    }
-  }
 
-  // Helper methods
-  private markAllFieldsAsTouched() {
+      let signatureData = '';
+      let photoData = '';
+
+      // Get signature base64 ONLY if it exists (optional)
+      if (this.hasSignature && this.signatureCanvas) {
+        try {
+          console.log('Capturing signature...');
+          signatureData = this.signatureCanvas.nativeElement.toDataURL('image/png');
+          console.log('Signature captured');
+        } catch (error) {
+          console.warn('Signature capture failed:', error);
+        }
+      }
+
+      // Get photo base64 ONLY if captured (optional)
+      if (this.photoCaptured && this.capturedPhotoUrl) {
+        try {
+          console.log('Using captured photo...');
+          photoData = this.capturedPhotoUrl;
+          console.log('Photo ready');
+        } catch (error) {
+          console.warn('Photo processing failed:', error);
+        }
+      }
+
+      // Prepare onboarding data - save base64 directly to Firestore
+      const onboardingData: OnboardingData = {
+        name: this.onboardingForm.value.name,
+        slNo: this.onboardingForm.value.slNo,
+        address: this.onboardingForm.value.address,
+        mobileNumber: this.onboardingForm.value.mobileNumber,
+        emailId: this.onboardingForm.value.emailId,
+        signature: signatureData || '',  // Save base64 or empty string
+        fingerprint: this.fingerprintCaptured ? this.fingerprintData : '',
+        photo: photoData || '',  // Save base64 or empty string
+        createdAt: new Date(),
+        createdBy: currentUser.uid,
+        userId: currentUser.uid
+      };
+
+      console.log('Saving onboarding data (base64 stored directly)');
+      await this.onboardingService.saveOnboardingData(onboardingData);
+      
+      // Show success message with what was saved
+      const savedItems = ['Basic information'];
+      if (signatureData) savedItems.push('Signature');
+      if (photoData) savedItems.push('Photo');
+      if (this.fingerprintCaptured) savedItems.push('Fingerprint');
+      
+      this.successMessage = `Employee saved successfully! (${savedItems.join(', ')})`;
+      console.log('Onboarding data saved successfully');
+      
+      // Reset form and redirect
+      setTimeout(() => {
+        this.resetForm();
+        this.router.navigate(['/dashboard']);
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Onboarding submission error:', error);
+      this.errorMessage = error.message || 'Failed to save employee data. Please try again.';
+    } finally {
+      this.loading = false;
+    }
+  } else {
+    this.markAllFieldsAsTouched();
+    this.errorMessage = 'Please fill all required basic information fields.';
+  }
+}
+  
+  private markAllFieldsAsTouched(): void {
     Object.keys(this.onboardingForm.controls).forEach(key => {
       this.onboardingForm.get(key)?.markAsTouched();
     });
   }
 
-  private resetForm() {
+  private resetForm(): void {
     this.onboardingForm.reset();
     this.clearSignature();
     this.fingerprintCaptured = false;
+    this.fingerprintData = '';
     this.photoCaptured = false;
     this.capturedPhotoUrl = '';
     this.successMessage = '';
     this.errorMessage = '';
   }
 
-  // Getter methods for template
+  // ==================== TEMPLATE GETTER METHODS ====================
+  
   get isFormValid(): boolean {
-    return this.onboardingForm.valid && this.hasSignature && this.fingerprintCaptured && this.photoCaptured;
+    // Form is valid if only required basic fields are filled
+    // Biometric data is completely optional
+    return this.onboardingForm.valid;
   }
 
-  // Progress calculation
   getProgressPercentage(): number {
     let completedFields = 0;
-    let totalFields = 7; // 5 form fields + signature + fingerprint + photo
+    const totalFields = 8; // 5 form fields + 3 optional biometric fields
 
-    // Check form fields
+    // Count completed form fields
     const formFields = ['name', 'slNo', 'address', 'mobileNumber', 'emailId'];
     formFields.forEach(field => {
       const control = this.onboardingForm.get(field);
@@ -348,7 +350,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Check biometric data
+    // Count optional biometric data
     if (this.hasSignature) completedFields++;
     if (this.fingerprintCaptured) completedFields++;
     if (this.photoCaptured) completedFields++;
@@ -356,8 +358,8 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     return Math.round((completedFields / totalFields) * 100);
   }
 
-  // Section completion checks
   isBasicInfoCompleted(): boolean {
+    // Check if all required basic fields are filled
     const basicFields = ['name', 'slNo', 'address', 'mobileNumber', 'emailId'];
     return basicFields.every(field => {
       const control = this.onboardingForm.get(field);
@@ -366,6 +368,16 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   }
 
   isBiometricCompleted(): boolean {
-    return this.hasSignature && this.fingerprintCaptured;
+    // This is now optional, just shows if ANY biometric is captured
+    return this.hasSignature || this.fingerprintCaptured || this.photoCaptured;
+  }
+
+  // Get count of captured biometrics
+  getBiometricCount(): number {
+    let count = 0;
+    if (this.hasSignature) count++;
+    if (this.fingerprintCaptured) count++;
+    if (this.photoCaptured) count++;
+    return count;
   }
 }

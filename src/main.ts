@@ -1,4 +1,4 @@
-// For Angular Fire v7+ (UPDATED CONFIGURATION)
+// src/main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
 import { importProvidersFrom } from '@angular/core';
@@ -7,11 +7,10 @@ import { routes } from './app/app.routes';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-// Updated Firebase imports
+// Firebase imports (WITHOUT Storage)
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { getStorage, provideStorage } from '@angular/fire/storage';
 import { environment } from './environments/environment';
 
 bootstrapApplication(App, {
@@ -22,10 +21,10 @@ bootstrapApplication(App, {
       FormsModule,
       CommonModule
     ),
-    // Updated syntax
+    // Firebase without Storage
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage())
+    provideFirestore(() => getFirestore())
+    // Removed: provideStorage(() => getStorage())
   ]
 }).catch(err => console.error(err));

@@ -225,7 +225,7 @@
         </div>
       </div>
 
-      <!-- Biometric Information Section -->
+      <!-- Biometric Information Section (Optional) -->
       <div class="section" [class.completed]="isBiometricCompleted()">
         <div class="section-header">
           <div class="section-icon">
@@ -241,7 +241,7 @@
               <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h3>Biometric Information</h3>
+          <h3>Biometric Information <span style="font-size: 0.875rem; font-weight: 400; opacity: 0.7;">(Optional)</span></h3>
           <div class="section-status" *ngIf="isBiometricCompleted()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -253,7 +253,7 @@
           <!-- Signature Section -->
           <div class="biometric-group">
             <div class="biometric-header">
-              <label class="form-label">Digital Signature</label>
+              <label class="form-label">Digital Signature <span style="font-size: 0.75rem; opacity: 0.7;">(Optional)</span></label>
               <div class="biometric-status" [class.completed]="hasSignature">
                 <svg *ngIf="hasSignature" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -297,7 +297,7 @@
           <!-- Fingerprint Section -->
           <div class="biometric-group">
             <div class="biometric-header">
-              <label class="form-label">Fingerprint Scan</label>
+              <label class="form-label">Fingerprint Scan <span style="font-size: 0.75rem; opacity: 0.7;">(Optional)</span></label>
               <div class="biometric-status" [class.completed]="fingerprintCaptured">
                 <svg *ngIf="fingerprintCaptured" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -346,7 +346,7 @@
         </div>
       </div>
 
-      <!-- Photo Capture Section -->
+      <!-- Photo Capture Section (Optional) -->
       <div class="section" [class.completed]="photoCaptured">
         <div class="section-header">
           <div class="section-icon">
@@ -355,7 +355,7 @@
               <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h3>Photo Capture</h3>
+          <h3>Photo Capture <span style="font-size: 0.875rem; font-weight: 400; opacity: 0.7;">(Optional)</span></h3>
           <div class="section-status" *ngIf="photoCaptured">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -412,7 +412,7 @@
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  📸 Capture Photo
+                  Capture Photo
                 </button>
                 <button 
                   type="button" 

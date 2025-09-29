@@ -342,7 +342,7 @@ body {
   border-radius: var(--border-radius);
   font-size: 1rem;
   transition: var(--transition);
-  background: var(--background-white);
+  background: #dbeafe;
   color: var(--text-dark);
   font-family: inherit;
 }
