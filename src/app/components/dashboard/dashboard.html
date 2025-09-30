@@ -5,7 +5,6 @@
     <div class="header-content">
       <div class="welcome-section">
         <h1>Welcome, {{ currentUser?.name || 'User' }}!</h1>
-        <p>Royal Associates Group Dashboard</p>
       </div>
       <div class="header-actions">
         <button class="btn btn-logout" (click)="logout()">
@@ -21,7 +20,7 @@
   <main class="dashboard-content">
     <!-- Stats Grid -->
     <section class="stats-section">
-      <div class="stat-card stat-primary">
+      <div class="stat-card">
         <div class="stat-icon-wrapper">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -33,7 +32,7 @@
         </div>
       </div>
 
-      <div class="stat-card stat-success">
+      <div class="stat-card">
         <div class="stat-icon-wrapper">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -45,7 +44,7 @@
         </div>
       </div>
 
-      <div class="stat-card stat-info">
+      <div class="stat-card">
         <div class="stat-icon-wrapper">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

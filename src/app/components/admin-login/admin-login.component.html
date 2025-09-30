@@ -8,7 +8,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" formControlName="email" class="form-control">
+        <input type="email" id="email" formControlName="email" class="form-control" style="width: -webkit-fill-available;">
         <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
           <small *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</small>
           <small *ngIf="loginForm.get('email')?.errors?.['email']">Enter a valid email</small>
@@ -17,7 +17,7 @@
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" formControlName="password" class="form-control">
+        <input type="password" id="password" formControlName="password" class="form-control" style="width: -webkit-fill-available;">
         <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
           <small *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</small>
           <small *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</small>
@@ -36,7 +36,6 @@
 
     <div class="card-footer">
       <p>Don't have an admin account? <a routerLink="/register">Register here</a></p>
-      <p><a routerLink="/user-login">User Login</a></p>
     </div>
   </div>
 </div>

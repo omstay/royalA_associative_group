@@ -187,88 +187,115 @@ body {
 
 /* Section Styles */
 .section {
-  background: var(--background-white);
-  border: 2px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  padding: 1.5rem;
-  transition: var(--transition);
+  background: #ffffff; /* light card background */
+  border: 2px solid #cfd8dc; /* subtle gray border */
+  border-radius: 16px; /* smooth curved edges */
+  padding: 1.75rem;
   position: relative;
   overflow: hidden;
+  transition: all 0.4s ease;
+
+  /* subtle shadow for depth */
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.06);
 }
 
+/* Decorative left accent bar */
 .section::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 6px;
   height: 100%;
-  background: var(--light-blue);
-  transition: var(--transition);
+  background: #0077b6; /* rich blue */
+  border-radius: 8px 0 0 8px;
+  transition: all 0.4s ease;
 }
 
+/* Hover effect */
 .section:hover {
-  border-color: var(--light-blue);
-  box-shadow: var(--shadow-md);
+  border-color: #0077b6;
+  box-shadow: 4px 8px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
+/* Completed section style */
 .section.completed {
-  border-color: var(--success-green);
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.02) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border-color: #059669; /* success green */
 }
 
 .section.completed::before {
-  background: var(--success-green);
+  background: #059669;
 }
 
+/* Section header */
 .section-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #cfd8dc;
 }
 
+/* Section icon */
 .section-icon {
-  background: var(--light-blue);
-  color: var(--primary-blue);
-  padding: 0.5rem;
-  border-radius: var(--border-radius);
+  background: #0077b6;
+  color: #fff;
+  padding: 0.6rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .section.completed .section-icon {
-  background: var(--success-green);
-  color: white;
+  background: #059669;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
+/* Section title */
 .section-header h3 {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
   margin: 0;
-  color: var(--text-dark);
+  color: #002f5f; /* dark rich color for high contrast */
+  transition: color 0.3s ease;
 }
 
+/* Section status (checkmark or label) */
 .section-status {
   margin-left: auto;
-  color: var(--success-green);
+  color: #059669;
+  font-weight: 600;
   animation: checkmark 0.5s ease-out;
+  transition: color 0.3s ease;
 }
 
+/* Optional hover effect on title text */
+.section:hover .section-header h3 {
+  color: #0077b6;
+}
+
+/* Optional keyframe for checkmark animation */
 @keyframes checkmark {
-  from {
+  0% {
+    transform: scale(0);
     opacity: 0;
-    transform: scale(0.5);
   }
-  to {
+  60% {
+    transform: scale(1.2);
     opacity: 1;
+  }
+  100% {
     transform: scale(1);
   }
 }
+
 
 .form-content {
   display: flex;
@@ -425,40 +452,50 @@ body {
   color: var(--success-green);
   animation: checkmark 0.5s ease-out;
 }
-
-/* Signature Styles */
+/* Signature container */
 .signature-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+/* Signature pad */
 .signature-pad {
   position: relative;
   border: 2px dashed var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
-  transition: var(--transition);
+  transition: all 0.3s ease;
+
+  /* Always keep card background white */
+  background: #fff;
 }
 
+/* Hover effect */
 .signature-pad:hover {
-  border-color: var(--light-blue);
+  border-color: #0077b6; /* light blue accent on hover */
 }
 
+/* When signature exists */
 .signature-pad.has-signature {
   border-style: solid;
-  border-color: var(--success-green);
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.02) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border-color: #059669; /* success green border */
+  
+  /* Optional subtle overlay instead of changing the whole background */
+  box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.2);
+  /* Keep background white to not affect card */
+  background: #fff;
 }
 
+/* Signature canvas */
 .signature-canvas {
   display: block;
   cursor: crosshair;
-  background: var(--background-white);
   width: 100%;
   height: 200px;
 }
 
+/* Overlay instructions */
 .signature-overlay {
   position: absolute;
   top: 0;
@@ -468,17 +505,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(2px);
   pointer-events: none;
 }
 
+/* Instruction text */
 .signature-instructions {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-light);
+  color: #777;
   text-align: center;
 }
 
@@ -492,9 +530,11 @@ body {
   50% { transform: translateY(-5px); }
 }
 
+/* Signature controls */
 .signature-controls {
   display: flex;
   justify-content: center;
+  gap: 0.5rem;
 }
 
 /* Fingerprint Styles */
@@ -671,25 +711,48 @@ body {
     opacity: 0.8;
   }
 }
+.camera-controls button {
+  padding: 0.75rem 1.5rem;   /* increased vertical padding for spacing */
+  min-height: 48px;          /* ensures uniform button height */
+  border-radius: 12px;       /* smooth curved edges */
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(90deg, #0077b6, #0096c7);
+  color: #fff;
+  line-height: 1.2;           /* better vertical alignment */
+}
 
+/* Hover effect */
+.camera-controls button:hover {
+  background: linear-gradient(90deg, #005f88, #0077b6);
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* Adjust SVG icon size */
+.camera-controls button svg {
+  stroke: #fff;
+  width: 18px;
+  height: 18px;
+}
+
+/* Optional: add spacing between multiple rows */
 .camera-controls {
   display: flex;
   justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
+  row-gap: 1rem;  /* extra spacing between rows */
 }
 
-.camera-active-controls {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.capture-btn {
-  font-size: 1.1rem;
-  padding: 0.875rem 1.5rem;
-  min-width: 160px;
-}
 
 /* Photo Preview */
 .photo-preview {
@@ -778,7 +841,6 @@ body {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-  color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -797,8 +859,7 @@ body {
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--success-green) 0%, #10b981 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--success-green) 50%, #10b981 100%);
 }
 
 .btn-success:hover:not(:disabled) {
@@ -885,6 +946,24 @@ body {
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
   margin-top: 1rem;
+  color: white;
+}
+
+/* Style submit button specifically */
+button[type="submit"] {
+  background: linear-gradient(90deg, #0077b6, #0096c7); /* rich blue gradient */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
 /* Responsive Design */
