@@ -10,31 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repo
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Checkout repo
+      - uses: actions/checkout@v3
 
-      # Setup Node.js version 20 explicitly
+      # Setup correct Node.js version
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          cache: 'npm'   # optional but helps speed up builds
 
-      # Clear npm cache to avoid picking up old Node
-      - name: Clean npm cache
-        run: npm cache clean --force
+      # Verify Node version
+      - name: Check Node version
+        run: node -v && npm -v
 
-      # Install dependencies using npm ci
-      - name: Install dependencies
-        run: npm ci
+      # Install dependencies
+      - run: npm ci
 
       # Build Angular app using local Angular CLI
-      - name: Build Angular app
-        run: npx ng build --configuration production
+      - run: npx ng build --configuration production
 
-      # Deploy to Firebase
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      # Deploy to Firebase Hosting
+      - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
